@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Edit Order #{{ order.order_number }}</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Order Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Order Items</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive mb-3">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                <tr>
+                                    <td>{{ item.menu_item.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                                    <td>${{ "%.2f"|format(item.subtotal) }}</td>
+                                    <td>
+                                        <form action="{{ url_for('orders.remove_order_item', order_id=order.id, item_id=item.id) }}"
+                                              method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Remove this item from the order?');">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Subtotal:</th>
+                                    <td colspan="2">${{ "%.2f"|format(order.total_amount - order.tax_amount - order.tip_amount) }}</td>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="text-end">Tax:</th>
+                                    <td colspan="2">${{ "%.2f"|format(order.tax_amount) }}</td>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="text-end">Tip:</th>
+                                    <td colspan="2">${{ "%.2f"|format(order.tip_amount) }}</td>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total:</th>
+                                    <td colspan="2">${{ "%.2f"|format(order.total_amount) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Add Item Form -->
+                    <form action="{{ url_for('orders.add_order_item', order_id=order.id) }}" method="POST">
+                        {{ item_form.hidden_tag() }}
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    {{ item_form.menu_item_id.label(class="form-label") }}
+                                    {{ item_form.menu_item_id(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    {{ item_form.quantity.label(class="form-label") }}
+                                    {{ item_form.quantity(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    {{ item_form.special_instructions.label(class="form-label") }}
+                                    {{ item_form.special_instructions(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                {{ item_form.submit(class="btn btn-primary") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Details Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Order Details</h3>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('orders.edit_order', order_id=order.id) }}" method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.table_number.label(class="form-label") }}
+                                    {{ form.table_number(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.server_name.label(class="form-label") }}
+                                    {{ form.server_name(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.status.label(class="form-label") }}
+                                    {{ form.status(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.payment_method.label(class="form-label") }}
+                                    {{ form.payment_method(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.tax_amount.label(class="form-label") }}
+                                    {{ form.tax_amount(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.tip_amount.label(class="form-label") }}
+                                    {{ form.tip_amount(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    {{ form.notes.label(class="form-label") }}
+                                    {{ form.notes(class="form-control", rows=3) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <a href="{{ url_for('orders.order_list') }}" class="btn btn-secondary">Back to Orders</a>
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Order Summary Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Order Number:</dt>
+                        <dd class="col-sm-7">{{ order.order_number }}</dd>
+                        
+                        <dt class="col-sm-5">Created:</dt>
+                        <dd class="col-sm-7">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                        
+                        <dt class="col-sm-5">Status:</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge bg-{{ 
+                                'success' if order.status.value == 'completed' 
+                                else 'danger' if order.status.value == 'cancelled'
+                                else 'warning' if order.status.value == 'in_progress'
+                                else 'primary' 
+                            }}">
+                                {{ order.status.value.replace('_', ' ').title() }}
+                            </span>
+                        </dd>
+                        
+                        <dt class="col-sm-5">Total Items:</dt>
+                        <dd class="col-sm-7">{{ order.items|length }}</dd>
+                        
+                        <dt class="col-sm-5">Total Amount:</dt>
+                        <dd class="col-sm-7">${{ "%.2f"|format(order.total_amount) }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if order.status.value == 'pending' or order.status.value == 'in_progress' %}
+                        <form action="{{ url_for('orders.complete_order', order_id=order.id) }}" method="POST">
+                            <button type="submit" class="btn btn-success btn-block w-100 mb-2">Complete Order</button>
+                        </form>
+                        <form action="{{ url_for('orders.cancel_order', order_id=order.id) }}" method="POST">
+                            <button type="submit" class="btn btn-danger btn-block w-100"
+                                    onclick="return confirm('Are you sure you want to cancel this order?');">
+                                Cancel Order
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

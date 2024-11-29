@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Inventory Cost Analysis</h1>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Cost Overview</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ingredient</th>
+                                    <th>Current Stock</th>
+                                    <th>Cost per Unit</th>
+                                    <th>Total Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in inventory_items %}
+                                <tr>
+                                    <td>{{ item.ingredient.name }}</td>
+                                    <td>{{ "%.2f"|format(item.quantity) }} {{ item.ingredient.unit }}</td>
+                                    <td>${{ "%.2f"|format(item.ingredient.cost_per_unit) }}</td>
+                                    <td>${{ "%.2f"|format(item.quantity * item.ingredient.cost_per_unit) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3">Total Inventory Value:</th>
+                                    <th>${{ "%.2f"|format(total_cost) }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <a href="{{ url_for('inventory.inventory_list', return_menu_item_id=return_menu_item_id) }}" class="btn btn-secondary">Back to Inventory</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

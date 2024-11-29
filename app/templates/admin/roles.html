@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Roles and Permissions</h1>
+    
+    <div class="card mt-4">
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Description</th>
+                        <th>Permissions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for role in roles %}
+                    <tr>
+                        <td>{{ role.name }}</td>
+                        <td>{{ role.description }}</td>
+                        <td>
+                            <ul class="list-unstyled">
+                                {% if role.permissions %}
+                                    {% for permission in role.permissions.get('permissions', []) %}
+                                        <li><span class="badge bg-primary">{{ permission }}</span></li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li><span class="badge bg-secondary">No permissions</span></li>
+                                {% endif %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

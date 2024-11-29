@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Orders</h1>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('orders.new_order') }}" class="btn btn-primary">New Order</a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Current Orders</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Table</th>
+                                    <th>Server</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.order_number }}</td>
+                                    <td>{{ order.table_number or 'N/A' }}</td>
+                                    <td>{{ order.server_name }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 
+                                            'success' if order.status.value == 'completed' 
+                                            else 'danger' if order.status.value == 'cancelled'
+                                            else 'warning' if order.status.value == 'in_progress'
+                                            else 'primary' 
+                                        }}">
+                                            {{ order.status.value.replace('_', ' ').title() }}
+                                        </span>
+                                    </td>
+                                    <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('orders.edit_order', order_id=order.id) }}" 
+                                               class="btn btn-sm btn-primary">Edit</a>
+                                            {% if order.status.value == 'pending' or order.status.value == 'in_progress' %}
+                                            <form action="{{ url_for('orders.complete_order', order_id=order.id) }}" 
+                                                  method="POST" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-success">Complete</button>
+                                            </form>
+                                            <form action="{{ url_for('orders.cancel_order', order_id=order.id) }}" 
+                                                  method="POST" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-danger" 
+                                                        onclick="return confirm('Are you sure you want to cancel this order?');">
+                                                    Cancel
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

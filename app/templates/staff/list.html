@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Staff Management</h1>
+        {% if current_user.has_permission('manage_staff') %}
+        <a href="{{ url_for('staff.create_staff') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Staff Member
+        </a>
+        {% endif %}
+    </div>
+
+    {% if staff_members %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for staff in staff_members %}
+                <tr>
+                    <td>{{ staff.name }}</td>
+                    <td>{{ staff.email }}</td>
+                    <td>{{ staff.role.name.title() }}</td>
+                    <td>
+                        <span class="badge {% if staff.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ 'Active' if staff.is_active else 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if staff.last_login %}
+                        {{ staff.last_login.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                        Never
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if current_user.has_permission('manage_staff') %}
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('staff.edit_staff', id=staff.id) }}" 
+                               class="btn btn-sm btn-outline-primary" 
+                               title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ url_for('staff.toggle_staff_status', id=staff.id) }}" 
+                                  method="POST" 
+                                  class="d-inline" 
+                                  onsubmit="return confirm('Are you sure you want to {{ 'deactivate' if staff.is_active else 'activate' }} this staff member?');">
+                                <button type="submit" 
+                                        class="btn btn-sm btn-outline-{{ 'warning' if staff.is_active else 'success' }}"
+                                        title="{{ 'Deactivate' if staff.is_active else 'Activate' }}">
+                                    <i class="fas fa-{{ 'ban' if staff.is_active else 'check' }}"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No staff members found.
+    </div>
+    {% endif %}
+
+    {% if current_user.has_permission('view_audit_logs') %}
+    <div class="mt-4">
+        <h2>Recent Activity</h2>
+        <a href="{{ url_for('staff.audit_logs') }}" class="btn btn-outline-secondary mb-3">
+            <i class="fas fa-history"></i> View All Audit Logs
+        </a>
+        
+        {% if recent_logs %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_logs %}
+                    <tr>
+                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ log.user.name }}</td>
+                        <td>
+                            <span class="badge {% if log.action == 'create_staff' %}bg-success
+                                             {% elif log.action == 'delete_staff' %}bg-danger
+                                             {% elif log.action == 'edit_staff' %}bg-info
+                                             {% else %}bg-secondary{% endif %}">
+                                {{ log.action.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if log.details %}
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    data-bs-toggle="popover" 
+                                    data-bs-trigger="focus"
+                                    title="Action Details"
+                                    data-bs-content="{{ log.details | tojson }}">
+                                View Details
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No recent activity found.</div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl, {
+            html: true,
+            sanitize: false
+        });
+    });
+});
+</script>
+{% endblock %}

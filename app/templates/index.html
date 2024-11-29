@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if current_user.is_authenticated %}
+    <div class="row">
+        <div class="col">
+            <h2>{{ current_user.restaurant_name }}</h2>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

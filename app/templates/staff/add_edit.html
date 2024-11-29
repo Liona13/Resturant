@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ title }}</h1>
+    <form method="POST" class="needs-validation" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            {{ form.email(class="form-control", id="email") }}
+            {% for error in form.email.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            {{ form.name(class="form-control", id="name") }}
+            {% for error in form.name.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label for="role" class="form-label">Role</label>
+            {{ form.role(class="form-select", id="role") }}
+            {% for error in form.role.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">
+                {% if request.endpoint == 'staff.edit_staff' %}
+                New Password (leave blank to keep current)
+                {% else %}
+                Password
+                {% endif %}
+            </label>
+            {{ form.password(class="form-control", id="password") }}
+            {% for error in form.password.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            {{ form.confirm_password(class="form-control", id="confirm_password") }}
+            {% for error in form.confirm_password.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="{{ url_for('staff.staff_list') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Prevent multiple form submissions
+document.querySelector('form').addEventListener('submit', function(e) {
+    // Disable the submit button
+    var submitButton = this.querySelector('button[type="submit"]');
+    if (submitButton.disabled) {
+        e.preventDefault();
+    } else {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+    }
+});
+</script>
+{% endblock %}
